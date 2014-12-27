@@ -30,7 +30,9 @@ func (s FastCGIServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	
 	startparameters := startones.Start(*golog)
 	
-	bthandler.BTrequestHandler(*golog,resp, req, "fi_FI", "porno", "site", "pathinfo",startparameters)
+	callback := req.Header.Get("X-CALLBACK")
+	
+	bthandler.BTrequestHandler(*golog,resp, req, "fi_FI", "porno", "site", "pathinfo",startparameters,callback)
 	
 
 }

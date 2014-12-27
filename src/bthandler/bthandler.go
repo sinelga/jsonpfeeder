@@ -6,23 +6,34 @@ import (
 	//	"createpage"
 	"log/syslog"
 	"net/http"
-	//	"strings"
-	//	"sitemaphandler"
-	//	"robots_txt"
+	"encoding/json"
 	"findfreeparagraph"
 	"fmt"
 )
 
-func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.Request, locale string, themes string, site string, pathinfo string, startparameters []string) {
+func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.Request, locale string, themes string, site string, pathinfo string, startparameters []string, callback string) {
 
 	//	pathinfoclean := clean_pathinfo.CleanPath(golog, pathinfo)
 
 	golog.Info(site + " ")
 
-	paragraph := findfreeparagraph.FindFromQ(golog,locale,themes,"test.com","google",startparameters)
-	
-	fmt.Println(paragraph)
-	
+	paragraph := findfreeparagraph.FindFromQ(golog, locale, themes, "test.com", "google", startparameters)
+
+	//	fmt.Println(paragraph)
+
+	if bparagraph, err := json.Marshal(paragraph); err != nil {
+
+		golog.Err(err.Error())
+
+	} else {
+
+		resp.Header().Add("Content-type", "application/javascript")
+
+		//		fmt.Sprintf(resp, "%s(%s)", "callback", bparagraph)
+		jsonBytes := []byte(fmt.Sprintf("%s(%s)", callback, bparagraph))
+		resp.Write(jsonBytes)
+
+	}
 
 	//	if blocksite {
 	//
