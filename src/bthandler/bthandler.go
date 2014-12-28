@@ -4,75 +4,84 @@ import (
 	//	"clean_pathinfo"
 	//	"createfirstgz"
 	//	"createpage"
-	"log/syslog"
-	"net/http"
+	"domains"
 	"encoding/json"
 	"findfreeparagraph"
 	"fmt"
+	"keywords_and_phrases"
+	"log/syslog"
+	"net/http"
+	"somekeywords"
+	"somephrases"
+	"strconv"
+	"strings"
 )
 
-func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.Request, locale string, themes string, site string, pathinfo string, startparameters []string, callback string) {
+func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.Request, locale string, themes string, site string, pathinfo string, startparameters []string, callback string, quant string) {
 
 	//	pathinfoclean := clean_pathinfo.CleanPath(golog, pathinfo)
 
 	golog.Info(site + " ")
 
-	paragraph := findfreeparagraph.FindFromQ(golog, locale, themes, "test.com", "google", startparameters)
+	if strings.HasPrefix(pathinfo, "/freeparagraph") {
 
-	//	fmt.Println(paragraph)
+		paragraph := findfreeparagraph.FindFromQ(golog, locale, themes, "test.com", "google", startparameters)
 
-	if bparagraph, err := json.Marshal(paragraph); err != nil {
+		//	fmt.Println(paragraph)
 
-		golog.Err(err.Error())
+		if bparagraph, err := json.Marshal(paragraph); err != nil {
 
-	} else {
+			golog.Err(err.Error())
 
-		resp.Header().Add("Content-type", "application/javascript")
+		} else {
 
-		//		fmt.Sprintf(resp, "%s(%s)", "callback", bparagraph)
-		jsonBytes := []byte(fmt.Sprintf("%s(%s)", callback, bparagraph))
-		resp.Write(jsonBytes)
+			resp.Header().Add("Content-type", "application/javascript")
+
+			//		fmt.Sprintf(resp, "%s(%s)", "callback", bparagraph)
+			jsonBytes := []byte(fmt.Sprintf("%s(%s)", callback, bparagraph))
+			resp.Write(jsonBytes)
+
+		}
 
 	}
 
-	//	if blocksite {
-	//
-	//		golog.Info("BTrequestHandler:will block-> " + site+pathinfo)
-	//
-	//	}
+	if strings.HasPrefix(pathinfo, "/keywords?") {
 
-	//	var bytepage []byte
-	//	if strings.HasSuffix(pathinfoclean, ".html")  {
-	//
-	//		bytepage = createpage.CreateHtmlPage(golog, locale, themes,site, bot, startparameters,blocksite,variant)
-	//
-	//		resp.Write(bytepage)
-	//
-	//	} else if (strings.HasSuffix(pathinfoclean, "sitemap.xml") || strings.HasSuffix(pathinfoclean, "index.xml"))  {
-	//
-	//
-	//		bytepage =sitemaphandler.Create(golog, locale, themes,site,startparameters)
-	//		resp.Header().Add("Content-type","text/xml")
-	//		resp.Write(bytepage)
-	//
-	//	} else if strings.HasSuffix(pathinfoclean, "robots.txt") {
-	//
-	//
-	//		bytepage =robots_txt.Create(golog, locale, themes,site)
-	//		resp.Header().Add("Content-type","text/plain")
-	//		resp.Write(bytepage)
-	//
-	//
-	//	} else {
-	//
-	//		resp.WriteHeader(404)
-	//
-	//	}
+		golog.Info("pathinfo  " + pathinfo + " " + quant)
 
-	//	if strings.HasSuffix(pathinfoclean, ".html") {
-	//
-	//		go createfirstgz.Creategzhtml(golog, locale, themes, site, pathinfoclean, bytepage)
-	//
-	//	}
+		keywords, phrases := keywords_and_phrases.GetAll(golog, locale, themes, startparameters)
+
+		quantint, _ := strconv.Atoi(quant)
+
+		somekeywordsres := somekeywords.GetSome(golog, keywords, quantint)
+		somephrasesres := somephrases.GetSome(golog, phrases, quantint)
+
+		var keyword_phrasearr []domains.Keyword_phrase
+
+		if len(somekeywordsres) == len(somephrasesres) {
+
+			for i, keyword := range somekeywordsres {
+
+				keyword_phrase := domains.Keyword_phrase{keyword, somephrasesres[i]}
+
+				keyword_phrasearr = append(keyword_phrasearr, keyword_phrase)
+
+			}
+
+		}
+
+		if bkeyword_phrasearr, err := json.Marshal(keyword_phrasearr); err != nil {
+
+			golog.Err(err.Error())
+
+		} else {
+			
+			resp.Header().Add("Content-type", "application/javascript")
+			
+			jsonBytes := []byte(fmt.Sprintf("%s(%s)", callback,bkeyword_phrasearr))
+			resp.Write(jsonBytes)
+		}
+
+	}
 
 }
