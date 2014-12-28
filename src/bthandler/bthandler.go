@@ -58,16 +58,25 @@ func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.R
 
 		var keyword_phrasearr []domains.Keyword_phrase
 
-		if len(somekeywordsres) == len(somephrasesres) {
+		if len(somekeywordsres) <= len(somephrasesres) {
 
 			for i, keyword := range somekeywordsres {
 
 				keyword_phrase := domains.Keyword_phrase{keyword, somephrasesres[i]}
-
 				keyword_phrasearr = append(keyword_phrasearr, keyword_phrase)
 
 			}
 
+		} else {
+			
+			
+			for i, phrase := range somephrasesres {
+
+				keyword_phrase := domains.Keyword_phrase{somekeywordsres[i], phrase}
+				keyword_phrasearr = append(keyword_phrasearr, keyword_phrase)
+
+			}						
+			
 		}
 
 		if bkeyword_phrasearr, err := json.Marshal(keyword_phrasearr); err != nil {
