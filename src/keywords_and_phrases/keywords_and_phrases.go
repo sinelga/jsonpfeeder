@@ -21,7 +21,7 @@ func GetAll(golog syslog.Writer, locale string, themes string, startparameters [
 
 	var keywords []string
 
-	if keywords, err = redis.Strings(c.Do("ZRANGEBYSCORE", queuename, "-inf", "+inf", "LIMIT", 0, 1000)); err != nil {
+	if keywords, err = redis.Strings(c.Do("ZREVRANGEBYSCORE", queuename, "+inf", "-inf", "LIMIT", 0, 1000)); err != nil {
 
 		golog.Crit("findkeywords: " + err.Error())
 
@@ -31,7 +31,7 @@ func GetAll(golog syslog.Writer, locale string, themes string, startparameters [
 
 	var phrases []string
 
-	if phrases, err = redis.Strings(c.Do("ZRANGEBYSCORE", queuename, "-inf", "+inf", "LIMIT", 0, 1000)); err != nil {
+	if phrases, err = redis.Strings(c.Do("ZREVRANGEBYSCORE", queuename, "+inf", "-inf", "LIMIT", 0, 1000)); err != nil {
 
 		golog.Crit("keywords_and_phrases: " + err.Error())
 
