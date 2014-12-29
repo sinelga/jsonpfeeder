@@ -13,9 +13,10 @@ func GetSome(golog syslog.Writer, keywords []string, quant int) []string {
 	min := int(0)
 	max := len(keywords)
 
-	rand.Seed(time.Now().UTC().UnixNano())
+//	rand.Seed(time.Now().UTC().UnixNano())
 
 	for i := 0; i < quant; i++ {
+		rand.Seed(time.Now().UTC().UnixNano())
 		rndint := rand.Intn(max-min) + min
 		outarrmap[keywords[rndint]] = struct{}{}
 
