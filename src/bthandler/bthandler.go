@@ -37,8 +37,20 @@ func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.R
 
 			resp.Header().Add("Content-type", "application/javascript")
 
-			//		fmt.Sprintf(resp, "%s(%s)", "callback", bparagraph)
-			jsonBytes := []byte(fmt.Sprintf("%s(%s)", callback, bparagraph))
+			var jsonBytes []byte
+			
+			if callback != "" {
+
+				jsonBytes = []byte(fmt.Sprintf("%s(%s)", callback, bparagraph))
+				
+
+			} else {
+				
+				resp.Header().Add("Access-Control-Allow-Origin", "*")
+				jsonBytes = []byte(fmt.Sprintf("%s", bparagraph))
+				
+			}
+			
 			resp.Write(jsonBytes)
 
 		}
@@ -68,15 +80,14 @@ func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.R
 			}
 
 		} else {
-			
-			
+
 			for i, phrase := range somephrasesres {
 
 				keyword_phrase := domains.Keyword_phrase{somekeywordsres[i], phrase}
 				keyword_phrasearr = append(keyword_phrasearr, keyword_phrase)
 
-			}						
-			
+			}
+
 		}
 
 		if bkeyword_phrasearr, err := json.Marshal(keyword_phrasearr); err != nil {
@@ -84,10 +95,10 @@ func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.R
 			golog.Err(err.Error())
 
 		} else {
-			
+
 			resp.Header().Add("Content-type", "application/javascript")
-			
-			jsonBytes := []byte(fmt.Sprintf("%s(%s)", callback,bkeyword_phrasearr))
+
+			jsonBytes := []byte(fmt.Sprintf("%s(%s)", callback, bkeyword_phrasearr))
 			resp.Write(jsonBytes)
 		}
 
