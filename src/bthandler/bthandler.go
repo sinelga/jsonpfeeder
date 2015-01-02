@@ -22,6 +22,7 @@ func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.R
 	//	pathinfoclean := clean_pathinfo.CleanPath(golog, pathinfo)
 
 	golog.Info(site + " ")
+	var jsonBytes []byte
 
 	if strings.HasPrefix(pathinfo, "/freeparagraph") {
 
@@ -36,21 +37,19 @@ func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.R
 		} else {
 
 			resp.Header().Add("Content-type", "application/javascript")
-
-			var jsonBytes []byte
 			
+
 			if callback != "" {
 
 				jsonBytes = []byte(fmt.Sprintf("%s(%s)", callback, bparagraph))
-				
 
 			} else {
-				
+
 				resp.Header().Add("Access-Control-Allow-Origin", "*")
 				jsonBytes = []byte(fmt.Sprintf("%s", bparagraph))
-				
+
 			}
-			
+
 			resp.Write(jsonBytes)
 
 		}
@@ -98,7 +97,16 @@ func BTrequestHandler(golog syslog.Writer, resp http.ResponseWriter, req *http.R
 
 			resp.Header().Add("Content-type", "application/javascript")
 
-			jsonBytes := []byte(fmt.Sprintf("%s(%s)", callback, bkeyword_phrasearr))
+			if callback != "" {
+
+				jsonBytes = []byte(fmt.Sprintf("%s(%s)", callback, bkeyword_phrasearr))
+
+			} else {
+
+				resp.Header().Add("Access-Control-Allow-Origin", "*")
+				jsonBytes = []byte(fmt.Sprintf("%s", bkeyword_phrasearr))
+
+			}
 			resp.Write(jsonBytes)
 		}
 
